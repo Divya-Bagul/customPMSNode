@@ -9,8 +9,9 @@ const varify = async (req,res,next)=>{
         if(header  !== 'undefined'){
             jwt.verify(header, secretkey, function(err, decoded) {
               if(err){
+                res.send({status:"500",data:'Invalid user ID'});
+
               
-                res.send('Invalid user ID');
               }else{
                
                 next();
@@ -19,7 +20,8 @@ const varify = async (req,res,next)=>{
             });
         
         }  else{
-            res.send('token is neccesary');
+          res.send({status:"500",data:'token is neccesary'});
+       
         } 
       
     }catch{
@@ -28,6 +30,11 @@ const varify = async (req,res,next)=>{
 }
 authRoute.post('/login',authController.login);
 authRoute.get('/userdata',varify,authController.userdata);
+authRoute.post('/create',varify,authController.createuser);
+authRoute.post('/update',varify,authController.updateUser);
+authRoute.post('/delete',varify,authController.deleteuser);
+
+
 
 
 module.exports = authRoute;
