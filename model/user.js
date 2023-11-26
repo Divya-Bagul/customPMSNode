@@ -5,15 +5,19 @@ mongoose.connect("mongodb://127.0.0.1:27017/cyber");
 const UserSchema = new mongoose.Schema(
     {
 
-        _id:{
-            type:String
-        },
+        // _id:{
+        //     type:String
+        // },
        name:{
         type:String,
         required:true
        },
         email:{
             type:String,
+            required:true
+        },
+        phone:{
+            type:Number,
             required:true
         },
         password:{
