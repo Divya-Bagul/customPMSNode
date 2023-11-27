@@ -53,24 +53,31 @@ const login = async (req, res) => {
 }
 
 const userdata = async (req, res) => {
-
+        
+        const limit = req.body.limit ||2;
+        const page = req.body.page || 1; 
+        const skip = limit * page - limit
+      
+        const result = {}
+        result.currentpage = page;
+        result.limit = limit;
+        result.totalaDta = await user.estimatedDocumentCount();
+        result.paginationList = Math.ceil(result.totalaDta / limit)
+       
         if (req.params.id != undefined) {
-
                 var userData = await user.find({ '_id': req.params.id});
-             
                 if (userData) {
                         res.status(200).send({ status: "200", data: userData });
                 } else {
                         res.status(500).send({ status: "500", data: 'Data Not Found' });
                 }
-                console.log(userData);
         } else {
-                var userData = await user.find();
+                var userData = await user.find({}).skip(skip).limit(limit);
                 if (userData.length > 0) {
-                                res.status(200).send({ status: "200", data: userData });
-                        } else {
-                                res.status(500).send({ status: "500", data: 'Data Not Found' });
-                        }
+                        res.status(200).send({ status: "200", data: userData,result:result});
+                } else {
+                        res.status(500).send({ status: "500", data: 'Data Not Found' });
+                }
         }
 
        

@@ -29,7 +29,7 @@ const varify = async (req,res,next)=>{
     }
 }
 authRoute.post('/login',authController.login);
-authRoute.get('/userdata/:id?',varify,authController.userdata);
+authRoute.post('/userdata/:id?',varify,authController.userdata);
 authRoute.post('/create',varify,authController.createuser);
 authRoute.post('/update/:id',varify,authController.updateUser);
 authRoute.post('/delete/:id',varify,authController.deleteuser);
