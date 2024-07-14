@@ -1,6 +1,8 @@
 const express = require('express');
 const authRoute = express();
 const user = require('../model/user');
+const complaint = require('../model/complaint');
+
 const bodyParser = require('body-parser')
 var cors = require('cors');
 authRoute.use(cors());
@@ -11,8 +13,11 @@ authRoute.use(bodyParser.json());
 var jwt = require('jsonwebtoken');
 const secretkey = 'secretkey';
 
+const multer = require('multer');
+const csvtojson = require('csvtojson');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
+
 var transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -80,8 +85,6 @@ const userdata = async (req, res) => {
                 }
         }
 
-       
-
 }
 const createuser = async (req, res) => {
         if (req.body.phone) {
@@ -108,7 +111,7 @@ const createuser = async (req, res) => {
 
 }
 const updateUser = async (req, res) => {
-
+        console.log(req.body.email,'req.body.email');
         const udateUser = await user.updateMany(
                 {
                         _id: req.params.id
@@ -154,11 +157,9 @@ const deleteuser = async (req, res) => {
                 res.send(error);
         }
 
-
 }
 const mail = async (req, res) => {
 
-     
         try {
                 var userData = await user.find({email:req.body.usermail});
                 if(req.body.password){
@@ -221,4 +222,61 @@ const mail = async (req, res) => {
                 res.status(500).send(error);
         }
 }
-module.exports = { login, userdata, createuser, updateUser, deleteuser, mail }
+
+const fileupdade = async (req,res)=>{
+     
+           res.send('asas');
+}
+const addComplaint = async (req, res) => {
+       try{
+                var complaintStore = new complaint({
+                        name: req.body.name,
+                        email: req.body.email,
+                        adhar_number: req.body.adhar_number,
+                        compliant_text: req.body.compliant_text,
+
+                });
+                await complaintStore.save();
+                console.log(complaintStore);
+                if (complaintStore) {
+                        res.status(200).send({ status: "200", data: 'Data Store Successfully' });
+                } else {
+                        res.statusCode = 401;
+                        res.status(401).send({ status: "401", data: 'Data Not Found' });
+                }
+       } catch(error){
+        res.status(401).send({ status: "401", data: error._message });
+                console.log(error);
+       }
+       
+}
+const Complaintdata = async (req, res) => {
+        
+        const limit = req.body.limit ||2;
+        const page = req.body.page || 1; 
+        const skip = limit * page - limit
+      
+        const result = {}
+        result.currentpage = page;
+        result.limit = limit;
+        result.totalaDta = await complaint.estimatedDocumentCount();
+        result.paginationList = Math.ceil(result.totalaDta / limit)
+       
+        if (req.params.id != undefined) {
+                var complaintData = await complaint.find({ '_id': req.params.id});
+                if (complaintData) {
+                        res.status(200).send({ status: "200", data: complaintData });
+                } else {
+                        res.status(500).send({ status: "500", data: 'Data Not Found' });
+                }
+        } else {
+                var complaintData = await complaint.find({}).skip(skip).limit(limit);
+                if (complaintData.length > 0) {
+                        res.status(200).send({ status: "200", data: complaintData,result:result});
+                } else {
+                        res.status(500).send({ status: "500", data: 'Data Not Found' });
+                }
+        }
+
+}
+module.exports = { login, userdata, createuser, updateUser, deleteuser, mail,fileupdade ,addComplaint ,Complaintdata}
